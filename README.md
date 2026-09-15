@@ -1,59 +1,40 @@
-# PosFrontend
+# POS System - Frontend 🛒
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+> ⚠️ **Estado del proyecto:** En desarrollo activo (Fase de integración de checkout y cobro por QR).
 
-## Development server
+Aplicación web de Punto de Venta (POS) desarrollada con **Angular 19** que interactúa con un backend en **NestJS**. Permite la búsqueda dinámica de productos por SKU o nombre, gestión de ticket de compra en tiempo real y modal de cobro con código QR.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## 🚀 Tecnologías utilizadas
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+* **Framework:** Angular (Standalone Components)
+* **Lenguaje:** TypeScript
+* **Estilos:** CSS3
+* **Cliente HTTP:** HttpClient (con integración de Bearer Tokens)
+* **Backend compatible:** NestJS + TypeORM + SQLite
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 📌 Funcionalidades principales
 
-```bash
-ng generate component component-name
-```
+* 🔍 **Búsqueda flexible:** Búsqueda de productos por ID, SKU o coincidencia parcial de nombre.
+* 🧾 **Ticket dinámico:** Cálculo automático de subtotales y total global, con opción de eliminar ítems.
+* 📱 **Cobro por QR:** Modal interactivo que genera un código QR para cobros de Mercado Pago.
+* 🛡️ **Manejo defensivo de datos:** Parseo de respuestas envueltas en estructuras tipo `ApiResponse`.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## ⚙️ Instalación y ejecución
 
-## Building
+1. Clonar el repositorio:
+   ```bash
+   git clone [https://github.com/Sanmgon20/pos-frontend.git](https://github.com/Sanmgon20/pos-frontend.git).
 
-To build the project run:
+2. Bash
+    npm install
 
-```bash
-ng build
-```
+3. Bash
+    ng serve
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+4. Abrir en el navegador: http://localhost:4200/   
