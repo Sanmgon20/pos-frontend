@@ -1,0 +1,197 @@
+/* CONTENEDOR GENERAL */
+.pos-layout {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0f172a;
+  color: #f8fafc;
+  min-height: 90vh;
+}
+
+/* SECCIÓN IZQUIERDA: BUSCADOR Y TABLA */
+.pos-main {
+  flex: 2.5;
+  background-color: #1e293b;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+/* BARRA DE BÚSQUEDA PLU */
+.search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 0.85rem 1.25rem;
+  font-size: 1.1rem;
+  background-color: #0f172a;
+  border: 2px solid #0284c7;
+  color: #ffffff;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-bar input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.btn-add {
+  padding: 0 1.75rem;
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-add:hover {
+  background-color: #0369a1;
+}
+
+/* TABLA DE PRODUCTOS */
+.pos-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.pos-table th {
+  background-color: #0f172a;
+  color: #94a3b8;
+  padding: 1rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #334155;
+}
+
+.pos-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 1rem;
+}
+
+.pos-table tbody tr:hover {
+  background-color: #334155;
+}
+
+.btn-del {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.btn-del:hover {
+  background-color: #dc2626;
+}
+
+/* SECCIÓN DERECHA: TOTAL Y PAGO */
+.pos-sidebar {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* TARJETA DE TOTAL */
+.total-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid #0284c7;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.total-card span {
+  font-size: 0.85rem;
+  color: #38bdf8;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.total-amount {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin: 0.5rem 0 0 0;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+/* BOTONES DE MEDIO DE PAGO */
+.payment-methods {
+  background-color: #1e293b;
+  padding: 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.payment-methods h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.btn-pay {
+  padding: 1rem;
+  border: 1px solid #334155;
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-pay:hover {
+  background-color: #0284c7;
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+/* PREVISUALIZACIÓN QR MERCADO PAGO */
+.qr-preview {
+  background-color: #1e293b;
+  padding: 1.25rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #334155;
+}
+
+.qr-preview p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.qr-preview img {
+  background-color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

@@ -21,10 +21,10 @@ export class LoginComponent {
   isRegisterMode = false;
 
   registerData = {
-    legajo: null,
+    legajo: '',
     name: '',
     password: '',
-    rol: 'USER',
+    rol: 'Cajero',
   };
 
   errorMessage = '';
@@ -42,7 +42,13 @@ export class LoginComponent {
   }
 
   onLogin() {
-    this.http.post(`${this.API_URL}/login`, this.loginData).subscribe({
+    const payload = {
+    // Number() o el operador + convierte el string "1003" al número 1003
+    legajo: Number(this.loginData.legajo), 
+    password: this.loginData.password
+  };
+
+    this.http.post(`${this.API_URL}/login`, payload).subscribe({
       next: (res: any) => {
         // Guardamos el token JWT en el almacenamiento local del navegador
         localStorage.setItem('token', res.access_token);
@@ -57,7 +63,14 @@ export class LoginComponent {
   }
 
   onRegister() {
-    this.http.post(`${this.API_URL}/register`, this.registerData).subscribe({
+    const payload = {
+    legajo: Number(this.registerData.legajo),
+    name: this.registerData.name,
+    password: this.registerData.password,
+    rol: this.registerData.rol,
+  };
+
+    this.http.post(`${this.API_URL}/register`, payload).subscribe({
       next: (res) => {
         console.log('Usuario registrado:', res);
         alert('Usuario registrado con éxito. Ahora podés iniciar sesión.');
