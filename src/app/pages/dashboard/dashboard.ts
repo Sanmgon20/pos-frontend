@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CobroModalComponent } from '../../components/cobro-modal';
 
 export interface ItemTicket {
   id: number;
@@ -17,7 +18,8 @@ export interface ItemTicket {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    CobroModalComponent
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
@@ -32,6 +34,9 @@ export class DashboardComponent {
   // Control del modal de pago QR
   mostrarModalQR: boolean = false;
   qrUrl: string = '';
+
+  // Control del modal de pago en EFECTIVO
+  mostrarModalEfectivo: boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -87,13 +92,11 @@ export class DashboardComponent {
 
   // --- SECCIÓN COBROS ---
 
+  // Pago QR
   abrirPagoQR() {
     if (this.ticket.length === 0) return;
 
-    // Link de cobro o Alias de Mercado Pago
-    const mercadoPagoLink = 'j'//'link.mercadopago.com.ar/sanmgon'; 
-    
-    // Generación dinámica del QR
+    const mercadoPagoLink = 'j'; // 'link.mercadopago.com.ar/sanmgon'; 
     this.qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mercadoPagoLink)}`;
     this.mostrarModalQR = true;
   }
@@ -102,8 +105,31 @@ export class DashboardComponent {
     this.mostrarModalQR = false;
   }
 
+  // Pago EFECTIVO
+  abrirPagoEfectivo() {
+    if (this.ticket.length === 0) return;
+    this.mostrarModalEfectivo = true;
+  }
+
+  cerrarModalEfectivo() {
+    this.mostrarModalEfectivo = false;
+  }
+
+  confirmarVentaEfectivo(datosCobro: { montoIngresado: number; vuelto: number }) {
+    console.log('Venta en efectivo concretada:', {
+      total: this.totalVenta,
+      pagaCon: datosCobro.montoIngresado,
+      vuelto: datosCobro.vuelto,
+      items: this.ticket
+    });
+
+    // Limpiamos el estado y reseteamos el ticket
+    this.ticket = [];
+    this.mostrarModalEfectivo = false;
+  }
+
   confirmarVenta() {
-    // Limpiamos el ticket al finalizar el cobro
+    // Limpiamos el ticket al finalizar el cobro QR
     this.ticket = [];
     this.mostrarModalQR = false;
   }

@@ -65,14 +65,13 @@
 
     <div class="payment-methods">
       <h3>Medio de Pago</h3>
-      <button class="btn-pay" [disabled]="ticket.length === 0">💵 Efectivo</button>
+      <button class="btn-pay" [disabled]="ticket.length === 0" (click)="abrirPagoEfectivo()">💵 Efectivo</button>
       <button class="btn-pay" [disabled]="ticket.length === 0">💳 Tarjeta</button>
       <button class="btn-pay" [disabled]="ticket.length === 0"(click)="abrirPagoQR()">📱 QR Mercado Pago</button>
       <div class="modal-overlay" *ngIf="mostrarModalQR" (click)="cerrarModalQR()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <h2>Escaneá con Mercado Pago</h2>
     <p class="qr-total">Total: $ {{ totalVenta | number:'1.2-2' }}</p>
-    
     <div class="qr-container">
       <img [src]="qrUrl" alt="QR Mercado Pago" />
     </div>
@@ -86,3 +85,11 @@
     </div>
   </div>
 </div>
+
+@if (mostrarModalEfectivo) {
+  <app-cobro-modal
+    [totalAPagar]="totalVenta"
+    (cobroConfirmado)="confirmarVentaEfectivo($event)"
+    (cancelado)="cerrarModalEfectivo()"
+  />
+}
