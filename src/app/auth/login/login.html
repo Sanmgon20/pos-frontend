@@ -1,109 +1,109 @@
-<div class="auth-container">
-  <!-- PANTALLA DE LOGIN -->
-  <div *ngIf="!isRegisterMode" class="card">
-    <h2>Sistema POS - Ingreso</h2>
+<div class="login-container">
+  @if (!isRegisterMode) {
+    <!-- Formulario de Login -->
+    <div class="card">
+      <h2>Iniciar Sesión</h2>
+      <form (ngSubmit)="onLogin()">
+        <div class="form-group">
+          <label for="loginLegajo">Legajo</label>
+          <input
+            type="number"
+            id="loginLegajo"
+            [(ngModel)]="loginData.legajo"
+            name="loginLegajo"
+            required
+            placeholder="Ingrese su legajo"
+          />
+        </div>
 
-    <form (ngSubmit)="onLogin()">
-      <div class="form-group">
-        <label for="login-legajo">Legajo</label>
-        <input
-          type="text"
-          id="login-legajo"
-          [(ngModel)]="loginData.legajo"
-          name="legajo"
-          placeholder="Ej: 1001"
-          required
-        />
-      </div>
+        <div class="form-group">
+          <label for="loginPassword">Contraseña</label>
+          <input
+            type="password"
+            id="loginPassword"
+            [(ngModel)]="loginData.password"
+            name="loginPassword"
+            required
+            placeholder="Ingrese su contraseña"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="login-password">Contraseña</label>
-        <input
-          type="password"
-          id="login-password"
-          [(ngModel)]="loginData.password"
-          name="password"
-          placeholder="••••••••"
-          required
-        />
-      </div>
+        @if (errorMessage) {
+          <div class="error-box">
+            {{ errorMessage }}
+          </div>
+        }
 
-      <div *ngIf="errorMessage" class="error-box">
+        <button type="submit" class="btn btn-primary">Ingresar</button>
+      </form>
+
+      <p class="toggle-text">
+        ¿No tenés cuenta?
+        <button type="button" class="btn-link" (click)="toggleMode()">Registrate acá</button>
+      </p>
+    </div>
+  } @else {
+    <!-- Formulario de Registro -->
+    <div class="card">
+  <h2>Crear Cuenta</h2>
+  <form (ngSubmit)="onRegister()">
+    <div class="form-group">
+      <label for="regLegajo">Legajo</label>
+      <input
+        type="number"
+        id="regLegajo"
+        [(ngModel)]="registerData.legajo"
+        name="regLegajo"
+        required
+        placeholder="Ingrese su legajo"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="regName">Nombre y Apellido</label>
+      <input
+        type="text"
+        id="regName"
+        [(ngModel)]="registerData.name"
+        name="regName"
+        required
+        placeholder="Ingrese su nombre"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="regPassword">Contraseña</label>
+      <input
+        type="password"
+        id="regPassword"
+        [(ngModel)]="registerData.password"
+        name="regPassword"
+        required
+        placeholder="Cree una contraseña"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="regRol">Rol</label>
+      <select id="regRol" [(ngModel)]="registerData.rol" name="regRol">
+        <option value="CASHIER">Cajero / Operador</option>
+        <option value="ADMIN">Administrador</option>
+      </select>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-box">
         {{ errorMessage }}
       </div>
+    }
 
-      <button type="submit" class="btn-primary">Iniciar Sesión</button>
-    </form>
+    <button type="submit" class="btn btn-success">Registrarse</button>
+  </form>
 
-    <div class="switch-mode">
-      <p>¿No tenés usuario?</p>
-      <button type="button" class="btn-secondary" (click)="toggleMode()">
-        Registrar nuevo usuario
-      </button>
-    </div>
-  </div>
-
-  <!-- PANTALLA DE REGISTRO -->
-  <div *ngIf="isRegisterMode" class="card">
-    <h2>Registrar Usuario</h2>
-
-    <form (ngSubmit)="onRegister()">
-      <div class="form-group">
-        <label for="reg-legajo">Legajo</label>
-        <input
-          type="number"
-          id="reg-legajo"
-          [(ngModel)]="registerData.legajo"
-          name="regLegajo"
-          placeholder="Ej: 1001"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="reg-name">Nombre completo</label>
-        <input
-          type="text"
-          id="reg-name"
-          [(ngModel)]="registerData.name"
-          name="regName"
-          placeholder="Ej: Santiago"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="reg-password">Contraseña</label>
-        <input
-          type="password"
-          id="reg-password"
-          [(ngModel)]="registerData.password"
-          name="regPassword"
-          placeholder="Mínimo 6 caracteres"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="reg-rol">Rol</label>
-        <select id="reg-rol" [(ngModel)]="registerData.rol" name="regRol">
-          <option value="USER">Cajero / Usuario</option>
-          <option value="ADMIN">Administrador</option>
-        </select>
-      </div>
-
-      <div *ngIf="errorMessage" class="error-box">
-        {{ errorMessage }}
-      </div>
-
-      <button type="submit" class="btn-primary">Guardar Registro</button>
-    </form>
-
-    <div class="switch-mode">
-      <p>¿Ya tenés cuenta?</p>
-      <button type="button" class="btn-secondary" (click)="toggleMode()">
-        Volver al Login
-      </button>
-    </div>
-  </div>
+  <p class="toggle-text">
+    ¿Ya tenés cuenta?
+    <button type="button" class="btn-link" (click)="toggleMode()">Iniciá sesión</button>
+  </p>
+</div>
+  }
 </div>

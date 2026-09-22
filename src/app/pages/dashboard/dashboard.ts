@@ -1,136 +1,173 @@
-import { Component } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, OnInit,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CobroModalComponent } from '../../components/cobro-modal';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 export interface ItemTicket {
   id: number;
-  sku: number;
+  sku: string;
   name: string;
-  price: number;
   cantidad: number;
+  price: number;
   subtotal: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    CobroModalComponent
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css']
+  styleUrl: './dashboard.css'
 })
-export class DashboardComponent {
-  private readonly API_URL = 'http://localhost:3000/products';
-  
-  terminoBusqueda: string = '';
+export class DashboardComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly API_PRODUCTS = 'http://localhost:3000/products';
+
+  // Variables del estado del POS
+  terminoBusqueda = '';
+  errorMessage = '';
   ticket: ItemTicket[] = [];
-  errorMessage: string = '';
 
-  // Control del modal de pago QR
-  mostrarModalQR: boolean = false;
-  qrUrl: string = '';
+  // Variables para modales
+  mostrarModalCrearProducto = false;
+  mostrarModalQR = false;
+  mostrarModalEfectivo = false;
+  qrUrl = '';
 
-  // Control del modal de pago en EFECTIVO
-  mostrarModalEfectivo: boolean = false;
+  ngOnInit(): void {
+    // Verificación de sesión al iniciar
+    if (!localStorage.getItem('token')) {
+      this.router.navigate(['/login']);
+    }
+  }
 
-  constructor(private http: HttpClient) {}
+  // --- GETTERS PARA ROL Y DATOS DEL USUARIO ---
+  get usuario() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  }
 
-  agregarProducto() {
-    if (!this.terminoBusqueda.trim()) return;
+  get esAdmin(): boolean {
+    return this.usuario?.rol === 'ADMIN';
+  }
 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  // --- CÁLCULO DEL TOTAL ---
+  get totalVenta(): number {
+    return this.ticket.reduce((acc, item) => acc + item.subtotal, 0);
+  }
 
-    this.http.get<any>(`${this.API_URL}/${this.terminoBusqueda.trim()}`, { headers }).subscribe({
+  // --- LÓGICA DE AGREGAR PRODUCTOS CON BBDD (NestJS + TypeORM) ---
+  agregarProducto(): void {
+    const termino = this.terminoBusqueda.trim();
+
+    if (!termino) {
+      this.errorMessage = 'Ingrese SKU, ID o Nombre del producto.';
+      return;
+    }
+
+    this.errorMessage = '';
+
+    // 1. Si el producto ya está en el ticket actual, incrementamos la cantidad localmente
+    const itemExistente = this.ticket.find(
+      i => String(i.sku).toLowerCase() === termino.toLowerCase() || 
+           i.name.toLowerCase() === termino.toLowerCase()
+    );
+
+    if (itemExistente) {
+      itemExistente.cantidad += 1;
+      itemExistente.subtotal = itemExistente.cantidad * itemExistente.price;
+      this.terminoBusqueda = '';
+      return;
+    }
+
+    // 2. Si no está en el ticket, consultamos al endpoint @Get(':termino') de NestJS
+    this.http.get<any>(`${this.API_PRODUCTS}/${encodeURIComponent(termino)}`).subscribe({
       next: (res) => {
-        this.errorMessage = '';
-        const producto = res.data || res;
-        this.insertarEnTicket(producto);
-        this.terminoBusqueda = '';
+        // Desenvolvemos 'data' en caso de venir mediante un interceptor/response wrapper
+        const producto = res.data ? res.data : res;
+
+        if (!producto) {
+          this.errorMessage = `Producto "${termino}" no encontrado.`;
+          return;
+        }
+
+        // Insertamos en el ticket usando los campos de la entidad de SQLite
+        const precio = Number(producto.price);
+
+        const nuevoItem: ItemTicket = {
+          id: producto.id,
+          sku: String(producto.sku),
+          name: producto.name,
+          cantidad: 1,
+          price: precio,
+          subtotal: precio
+        };
+
+        this.ticket.push(nuevoItem);
+        this.terminoBusqueda = ''; // Limpiamos el input
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Producto no encontrado';
+        if (err.status === 404) {
+          this.errorMessage = `El producto "${termino}" no existe o está inactivo.`;
+        } else {
+          this.errorMessage = 'Error al consultar el servidor.';
+        }
       }
     });
   }
 
-  private insertarEnTicket(productoRaw: any) {
-    const producto = productoRaw.data ? productoRaw.data : productoRaw;
-
-    const productoId = Number(producto.id);
-    const precioNum = Number(producto.price) || 0;
-
-    const index = this.ticket.findIndex(item => item.id === productoId);
-
-    if (index !== -1) {
-      this.ticket[index].cantidad += 1;
-      this.ticket[index].subtotal = this.ticket[index].cantidad * this.ticket[index].price;
-    } else {
-      this.ticket.push({
-        id: productoId,
-        sku: producto.sku,
-        name: producto.name,
-        price: precioNum,
-        cantidad: 1,
-        subtotal: precioNum
-      });
-    }
-  }
-
-  quitarItem(index: number) {
+  quitarItem(index: number): void {
     this.ticket.splice(index, 1);
   }
 
-  get totalVenta(): number {
-    return this.ticket.reduce((sum, item) => sum + item.subtotal, 0);
+  // --- ACCIONES ADMIN Y PAGO ---
+  abrirModalCrearProducto(): void {
+    console.log('Abrir modal de nuevo producto');
   }
 
-  // --- SECCIÓN COBROS ---
-
-  // Pago QR
-  abrirPagoQR() {
-    if (this.ticket.length === 0) return;
-
-    const mercadoPagoLink = 'j'; // 'link.mercadopago.com.ar/sanmgon'; 
-    this.qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(mercadoPagoLink)}`;
-    this.mostrarModalQR = true;
-  }
-
-  cerrarModalQR() {
-    this.mostrarModalQR = false;
-  }
-
-  // Pago EFECTIVO
-  abrirPagoEfectivo() {
-    if (this.ticket.length === 0) return;
+  abrirPagoEfectivo(): void {
     this.mostrarModalEfectivo = true;
   }
 
-  cerrarModalEfectivo() {
+  cerrarModalEfectivo(): void {
     this.mostrarModalEfectivo = false;
   }
 
-  confirmarVentaEfectivo(datosCobro: { montoIngresado: number; vuelto: number }) {
-    console.log('Venta en efectivo concretada:', {
-      total: this.totalVenta,
-      pagaCon: datosCobro.montoIngresado,
-      vuelto: datosCobro.vuelto,
-      items: this.ticket
-    });
-
-    // Limpiamos el estado y reseteamos el ticket
-    this.ticket = [];
-    this.mostrarModalEfectivo = false;
+  abrirPagoQR(): void {
+    this.mostrarModalQR = true;
   }
 
-  confirmarVenta() {
-    // Limpiamos el ticket al finalizar el cobro QR
-    this.ticket = [];
+  cerrarModalQR(): void {
     this.mostrarModalQR = false;
+  }
+
+  confirmarVenta(): void {
+    alert('Venta realizada con éxito');
+    this.ticket = [];
+    this.cerrarModalQR();
+    this.cerrarModalEfectivo();
+  }
+
+  confirmarVentaEfectivo(event: any): void {
+    this.confirmarVenta();
+  }
+
+  // --- CERRAR SESIÓN ---
+  onLogout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
   }
 }

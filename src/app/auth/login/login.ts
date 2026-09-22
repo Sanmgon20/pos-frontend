@@ -1,84 +1,92 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrl: './login.css'
 })
 export class LoginComponent {
-  // Modelos de datos para binding bidireccional ([(ngModel)])
-  loginData = {
-    legajo: null,
-    password: '',
-  };
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   isRegisterMode = false;
-
-  registerData = {
-    legajo: '',
-    name: '',
-    password: '',
-    rol: 'Cajero',
-  };
-
   errorMessage = '';
 
-  private readonly API_URL = 'http://localhost:3000/auth';
+  loginData = {
+    legajo: null as number | null,
+    password: ''
+  };
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly router: Router,
-  ) {}
+  registerData = {
+    legajo: null as number | null,
+    name: '',
+    password: '',
+    rol: 'ADMIN' as 'ADMIN' | 'CASHIER'
+  };
 
-  toggleMode() {
+  toggleMode(): void {
     this.isRegisterMode = !this.isRegisterMode;
     this.errorMessage = '';
   }
 
-  onLogin() {
-    const payload = {
-    // Number() o el operador + convierte el string "1003" al número 1003
-    legajo: Number(this.loginData.legajo), 
-    password: this.loginData.password
-  };
-
-    this.http.post(`${this.API_URL}/login`, payload).subscribe({
-      next: (res: any) => {
-        // Guardamos el token JWT en el almacenamiento local del navegador
-        localStorage.setItem('token', res.access_token);
-        console.log('Login exitoso:', res);
-        // Redirigir a la pantalla principal del POS
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.errorMessage = err.error?.message || 'Credenciales inválidas';
-      },
-    });
+  onLogin(): void {
+  if (!this.loginData.legajo || !this.loginData.password) {
+    this.errorMessage = 'Por favor, completá legajo y contraseña.';
+    return;
   }
 
-  onRegister() {
-    const payload = {
-    legajo: Number(this.registerData.legajo),
+  this.authService.login({
+    legajo: Number(this.loginData.legajo),
+    password: this.loginData.password.trim()
+  }).subscribe({
+    next: () => {
+      // El AuthService ya guardó 'token' y 'user' en el localStorage durante el pipe(tap)
+      this.router.navigate(['/dashboard']);
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.responseMessage?.message || 'Error al iniciar sesión';
+    }
+  });
+}
+  
+ onRegister(): void {
+  const legajoNum = Number(this.registerData.legajo);
+
+  if (!this.registerData.legajo || Number.isNaN(legajoNum) || !this.registerData.name || !this.registerData.password) {
+    this.errorMessage = 'Por favor, completá todos los campos del registro con un legajo válido.';
+    return;
+  }
+
+  this.authService.register({
+    legajo: legajoNum,
     name: this.registerData.name,
-    password: this.registerData.password,
-    rol: this.registerData.rol,
-  };
-
-    this.http.post(`${this.API_URL}/register`, payload).subscribe({
-      next: (res) => {
-        console.log('Usuario registrado:', res);
-        alert('Usuario registrado con éxito. Ahora podés iniciar sesión.');
-        this.toggleMode(); // Cambiamos de pantalla al login
-      },
-      error: (err) => {
-        this.errorMessage = err.error?.message || 'Error al registrar usuario';
-      },
-    });
-  }
+    password: this.registerData.password.trim(),
+    rol: this.registerData.rol
+  }).subscribe({
+    next: () => {
+      // Auto-login directo: el AuthService se encarga de interceptar la respuesta 
+      // y guardar token y user en el localStorage automáticamente.
+      this.authService.login({
+        legajo: legajoNum,
+        password: this.registerData.password.trim()
+      }).subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: () => {
+          this.isRegisterMode = false;
+          this.errorMessage = 'Usuario creado con éxito. Por favor, iniciá sesión.';
+        }
+      });
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.responseMessage?.message || err.error?.message || 'Error al registrar el usuario';
+    }
+  });
+}
 }
