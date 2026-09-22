@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ProductsService } from '../../services/products.service';
 
 export interface ItemTicket {
   id: number;
@@ -26,6 +27,7 @@ export class DashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly productsService = inject(ProductsService);
 
   private readonly API_PRODUCTS = 'http://localhost:3000/products';
 
@@ -39,6 +41,15 @@ export class DashboardComponent implements OnInit {
   mostrarModalQR = false;
   mostrarModalEfectivo = false;
   qrUrl = '';
+
+  nuevoProducto = {
+    sku: '',
+    name: '',
+    price: 0,
+    stock: 0,
+    stockMinimo: 5,
+    activo: 1
+  };
 
   ngOnInit(): void {
     // Verificación de sesión al iniciar
@@ -75,6 +86,7 @@ export class DashboardComponent implements OnInit {
       this.errorMessage = 'Ingrese SKU, ID o Nombre del producto.';
       return;
     }
+
 
     this.errorMessage = '';
 
@@ -132,9 +144,58 @@ export class DashboardComponent implements OnInit {
     this.ticket.splice(index, 1);
   }
 
+  guardarNuevoProducto(): void {
+  if (!this.nuevoProducto.sku || !this.nuevoProducto.name || this.nuevoProducto.price <= 0) {
+    alert('Por favor, completá SKU, Nombre y un Precio mayor a 0.');
+    return;
+  }
+
+  const payload = {
+    sku: Number(this.nuevoProducto.sku),
+    name: this.nuevoProducto.name.trim(),
+    price: Number(this.nuevoProducto.price),
+    stock: Number(this.nuevoProducto.stock) || 0,
+    stockMinimo: Number(this.nuevoProducto.stockMinimo) || 0,
+    activo: 1
+  };
+
+  // Delegamos la llamada HTTP al servicio
+  this.productsService.create(payload).subscribe({
+    next: () => {
+      alert('✅ ¡Producto creado con éxito!');
+      this.cerrarModalCrearProducto();
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error al crear producto:', err);
+      const msjError = err.error?.message || err.error?.responseMessage?.message || 'Error al guardar el producto.';
+      alert(`❌ ${Array.isArray(msjError) ? msjError.join(', ') : msjError}`);
+    }
+  });
+}
+
+  
+
   // --- ACCIONES ADMIN Y PAGO ---
   abrirModalCrearProducto(): void {
-    console.log('Abrir modal de nuevo producto');
+    this.errorMessage = '';
+    this.mostrarModalCrearProducto = true;
+  }
+
+  cerrarModalCrearProducto(): void {
+    this.mostrarModalCrearProducto = false;
+    this.resetFormularioNuevoProducto();
+  }
+
+  resetFormularioNuevoProducto(): void {
+    this.nuevoProducto = {
+      sku: '',
+      name: '',
+      price: 0,
+      stock: 0,
+      stockMinimo: 5,
+      activo: 1
+    };
   }
 
   abrirPagoEfectivo(): void {

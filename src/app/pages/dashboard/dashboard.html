@@ -150,3 +150,77 @@
     </div>
   </div>
 }
+
+<!-- Modal Crear Nuevo Producto (Solo visible cuando mostrarModalCrearProducto es true) -->
+@if (mostrarModalCrearProducto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📦 Registrar Nuevo Producto</h3>
+        <button type="button" class="btn-close" (click)="cerrarModalCrearProducto()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label>Código SKU / Código de Barras (*):</label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [(ngModel)]="nuevoProducto.sku" 
+            placeholder="Ej: 779123456" 
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label>Nombre del Producto (*):</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="nuevoProducto.name" 
+            placeholder="Ej: Coca-Cola 1.5L" 
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label>Precio de Venta ($) (*):</label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [(ngModel)]="nuevoProducto.price" 
+            placeholder="Ej: 2500" 
+          />
+        </div>
+
+        <div class="form-group mb-3">
+  <label>Stock Inicial:</label>
+  <input 
+    type="number" 
+    class="form-control" 
+    [(ngModel)]="nuevoProducto.stock" 
+    placeholder="Ej: 50" 
+  />
+</div>
+
+<!-- 👈 Nuevo campo obligatorio por el backend -->
+<div class="form-group mb-3">
+  <label>Stock Mínimo (*):</label>
+  <input 
+    type="number" 
+    class="form-control" 
+    [(ngModel)]="nuevoProducto.stockMinimo" 
+    placeholder="Ej: 5" 
+  />
+</div>
+
+        
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cerrarModalCrearProducto()">Cancelar</button>
+        <button type="button" class="btn-confirm" (click)="guardarNuevoProducto()">
+          💾 Guardar Producto
+        </button>
+      </div>
+    </div>
+  </div>
+}

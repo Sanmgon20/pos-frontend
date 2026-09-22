@@ -9,7 +9,9 @@ export interface Product {
   sku: number;
   name: string;
   price: number;
-  // ... otros campos
+  stock?: number;
+  stockMinimo?: number;
+  activo?: number;
 }
 
 @Injectable({
@@ -33,11 +35,19 @@ export class ProductsService {
   }
 
   // Acciones administrativas (Solo Admin)
-  crearProducto(producto: Partial<Product>): Observable<Product> {
-    return this.http.post<Product>(this.API_URL, producto, {
-      headers: this.getHeaders(),
+  create(productData: Omit<Product, 'id'>): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
+
+    return this.http.post<any>(this.API_URL, productData, { headers });
   }
+
+  getByTermino(termino: string): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/${encodeURIComponent(termino)}`);
+  }
+
 
   actualizarProducto(id: number, producto: Partial<Product>): Observable<Product> {
     return this.http.patch<Product>(`${this.API_URL}/${id}`, producto, {
