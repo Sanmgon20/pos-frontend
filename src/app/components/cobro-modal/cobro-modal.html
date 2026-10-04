@@ -21,6 +21,7 @@
           placeholder="0.00"
           [ngModel]="montoIngresado()"
           (ngModelChange)="montoIngresado.set($event)"
+          (keyup.enter)="pagoSuficiente() && confirmar()"
           class="input-monto"
           autofocus
         />

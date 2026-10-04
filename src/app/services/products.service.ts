@@ -27,7 +27,7 @@ export class ProductsService {
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  // Lectura (Cajeros y Admin)
+  
   obtenerPorTermino(termino: string): Observable<Product> {
     return this.http.get<Product>(`${this.API_URL}/${termino}`, {
       headers: this.getHeaders(),

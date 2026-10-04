@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
-// Objeto de Usuario
+
 export interface User {
   id: number;
   legajo: number;
@@ -10,7 +10,6 @@ export interface User {
   rol: 'ADMIN' | 'CASHIER' | string;
 }
 
-// Estructura REAL de respuesta de NestJS
 export interface LoginResponse {
   success: boolean;
   serverTime: string;
@@ -34,7 +33,6 @@ export class AuthService {
   login(credentials: { legajo: number; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials).pipe(
       tap((res) => {
-        // Leemos desde res.data que es la estructura real devuelta por NestJS
         if (res?.data?.access_token && res?.data?.user) {
           localStorage.setItem('token', res.data.access_token);
           localStorage.setItem('user', JSON.stringify(res.data.user));

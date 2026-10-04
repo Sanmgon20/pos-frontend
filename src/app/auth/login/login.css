@@ -1,11 +1,13 @@
-/* FONDO GENERAL */
-.auth-container {
+/* CONTENEDOR PRINCIPAL - Centra la card vertical y horizontalmente */
+.login-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  justify-content: center; /* Centrado horizontal */
+  align-items: center;     /* Centrado vertical */
+  min-height: 100vh;       /* Ocupa toda la altura de la pantalla */
   background: linear-gradient(135deg, #002f6c 0%, #0056b3 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 /* TARJETA DE LOGIN / REGISTRO */
@@ -15,7 +17,7 @@
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   width: 100%;
-  max-width: 600px;
+  max-width: 450px; /* Tamaño ideal para un formulario centrado */
   border-top: 5px solid #d90429; /* Detalle distintivo en rojo */
 }
 
@@ -38,7 +40,7 @@ h2 {
 }
 
 .form-group label {
-  font-size: 20px;
+  font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
   color: #002f6c;
@@ -62,12 +64,10 @@ h2 {
   box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
 }
 
-/* BOTÓN PRINCIPAL (AZUL) */
-.btn-primary {
+/* BOTONES PRINCIPALES */
+.btn {
   width: 100%;
   padding: 0.85rem;
-  background-color: #0056b3;
-  color: white;
   border: none;
   border-radius: 6px;
   font-size: 1rem;
@@ -77,37 +77,52 @@ h2 {
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
+.btn-primary {
+  background-color: #0056b3;
+  color: white;
+}
+
 .btn-primary:hover {
   background-color: #003d82;
 }
 
-.btn-primary:active {
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.btn:active {
   transform: scale(0.99);
 }
 
-/* BOTÓN SECUNDARIO / CAMBIO DE MODO */
-.btn-secondary {
+/* BOTÓN DE ENLACE Y TEXTO INFERIOR */
+.toggle-text {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #495057;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1.25rem;
+}
+
+.btn-link {
   background: none;
   border: none;
-  color: #d90429; /* Rojo para acentuar el llamado a la acción */
+  color: #d90429;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
   font-size: 0.9rem;
+  margin-left: 0.25rem;
 }
 
-.btn-secondary:hover {
+.btn-link:hover {
   color: #b8001f;
-}
-
-.switch-mode {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #495057;
-  border-top: 1px solid #e9ecef;
-  padding-top: 1.25rem;
 }
 
 /* MENSAJE DE ERROR */

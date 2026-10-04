@@ -1,0 +1,51 @@
+<div class="modal-overlay" *ngIf="sale">
+  <div class="ticket-container">
+    <!-- Encabezado del Ticket -->
+    <div class="ticket-header">
+      <h2>MI COMERCIO</h2>
+      <p>Ticket de Venta #{{ sale.id }}</p>
+      <p class="fecha">{{ sale.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+      <p *ngIf="sale.user">Cajero: {{ sale.user.nombre || sale.user.username }}</p>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Tabla de Ítems -->
+    <table class="ticket-table">
+      <thead>
+        <tr>
+          <th>Cant.</th>
+          <th>Producto</th>
+          <th class="text-right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of sale.details">
+          <td>{{ item.cantidad }}x</td>
+          <td>{{ item.product?.nombre || 'Producto #' + item.producto_id }}</td>
+          <td class="text-right">${{ item.subtotal | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="divider" />
+
+    <!-- Totales -->
+    <div class="ticket-totals">
+      <div class="total-row">
+        <span>Medio de Pago:</span>
+        <strong>{{ sale.medio_pago }}</strong>
+      </div>
+      <div class="total-row grand-total">
+        <span>TOTAL:</span>
+        <strong>${{ sale.total | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <!-- Botones de Acción (No salen al imprimir) -->
+    <div class="ticket-actions no-print">
+      <button class="btn-print" (click)="printTicket()">🖨️ Imprimir / PDF</button>
+      <button class="btn-close" (click)="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

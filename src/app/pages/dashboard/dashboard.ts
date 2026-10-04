@@ -5,6 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ProductsService } from '../../services/products.service';
+import { CobroModalComponent } from '../../components/cobro-modal/cobro-modal';
+import { CreateSale, SalesService,CreateSaleItem } from '../../services/sales.service';
+import { TicketModalComponent } from '../../components/ticket-modal/ticket-modal';
 
 export interface ItemTicket {
   id: number;
@@ -18,7 +21,7 @@ export interface ItemTicket {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CobroModalComponent,TicketModalComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -28,6 +31,7 @@ export class DashboardComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly productsService = inject(ProductsService);
+  private readonly salesService = inject (SalesService)
 
   private readonly API_PRODUCTS = 'http://localhost:3000/products';
 
@@ -35,6 +39,7 @@ export class DashboardComponent implements OnInit {
   terminoBusqueda = '';
   errorMessage = '';
   ticket: ItemTicket[] = [];
+  saleParaTicket: any = null;
 
   // Variables para modales
   mostrarModalCrearProducto = false;
@@ -78,7 +83,6 @@ export class DashboardComponent implements OnInit {
     return this.ticket.reduce((acc, item) => acc + item.subtotal, 0);
   }
 
-  // --- LÓGICA DE AGREGAR PRODUCTOS CON BBDD (NestJS + TypeORM) ---
   agregarProducto(): void {
     const termino = this.terminoBusqueda.trim();
 
@@ -127,7 +131,7 @@ export class DashboardComponent implements OnInit {
         };
 
         this.ticket.push(nuevoItem);
-        this.terminoBusqueda = ''; // Limpiamos el input
+        this.terminoBusqueda = '';
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -174,9 +178,40 @@ export class DashboardComponent implements OnInit {
   });
 }
 
-  
+procesarVenta(medioPago: string): void {
+  if (this.ticket.length === 0) {
+    alert('El ticket está vacío.');
+    return;
+  }
 
-  // --- ACCIONES ADMIN Y PAGO ---
+  const payload: CreateSale = {
+    total: Number(this.totalVenta),
+    medioPago: medioPago,
+    usuarioId: Number(this.usuario?.id || 1),
+    detalles: this.ticket.map((item) => ({
+      productoId: item.id,
+      cantidad: Number(item.cantidad),
+      precioUnitario: Number(item.price),
+      subtotal: Number(item.subtotal),
+    })),
+  };
+
+  this.salesService.createSale(payload).subscribe({
+    next: (res: any) => {
+      this.saleParaTicket = res.data;
+      this.ticket = [];
+      this.cerrarModalQR();
+      this.cerrarModalEfectivo();
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error al registrar la venta:', err);
+      alert('❌ Error al procesar el cobro en el servidor.');
+    },
+  });
+}
+
+  
   abrirModalCrearProducto(): void {
     this.errorMessage = '';
     this.mostrarModalCrearProducto = true;
@@ -206,6 +241,10 @@ export class DashboardComponent implements OnInit {
     this.mostrarModalEfectivo = false;
   }
 
+  onCobroEfectivoConfirmado(data: { montoIngresado: number; vuelto: number }): void {
+    this.procesarVenta('EFECTIVO');
+  }
+
   abrirPagoQR(): void {
     this.mostrarModalQR = true;
   }
@@ -215,14 +254,7 @@ export class DashboardComponent implements OnInit {
   }
 
   confirmarVenta(): void {
-    alert('Venta realizada con éxito');
-    this.ticket = [];
-    this.cerrarModalQR();
-    this.cerrarModalEfectivo();
-  }
-
-  confirmarVentaEfectivo(event: any): void {
-    this.confirmarVenta();
+    this.procesarVenta('QR');
   }
 
   // --- CERRAR SESIÓN ---
